@@ -1,9 +1,9 @@
 #include <stdint.h>
 
-void Leds_Init(uint16_t *address);
+int Leds_Init(uint16_t *address);
 
-void Leds_TurnOn(int led);
+int Leds_TurnOn(int led);
 
-void Leds_TurnOff(int led);
+int Leds_TurnOff(int led);
 
-void Led_TurnAllOn(void);
+int Led_TurnAllOn(void);
