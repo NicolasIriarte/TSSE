@@ -1,5 +1,5 @@
 # Build tex files into a PDF.
-build:
+tp1:
     #!/bin/bash
     set -e
     #######
@@ -43,8 +43,13 @@ build:
     # # pdflatex -shell-escape \\nonstopmode\\input Tp3-IriarteNicolas.tex || echo "Second compilation failed."
     # # pdflatex -shell-escape \\nonstopmode\\input Tp3-IriarteNicolas.tex
 
+tp2:
+    #!/bin/bash
+    cd {{justfile_directory()}}/TP2
+    ceedling
+
 
 # Clean repository.
 clean:
     #!/bin/bash
-    rm -rf */*.aux */*.log */*.out */*.toc */*.pdf
+    rm -rf */*.aux */*.log */*.out */*.toc */*.pdf */build

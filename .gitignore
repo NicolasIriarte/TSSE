@@ -274,3 +274,8 @@ TSWLatexianTemp*
 
 # Makeindex log files
 *.lpz
+
+# Ceedling
+build
+compile_commands.json
+*/support/*
