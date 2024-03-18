@@ -194,7 +194,7 @@
 	\vspace{3cm}
 	{\Huge \textbf{\ttitle}} \\
 	\vspace{1cm}
-	{\Large \textbf{Especificación de requerimientos de software}}\\
+	{\Large \textbf{Master Test Plan}}\\
 	\vspace{4cm}
 
 
