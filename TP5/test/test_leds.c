@@ -62,39 +62,74 @@ void test_TurnOffAnyLed(void) {
 }
 
 // 8. Comprobar valores prohibidos
-void test_LedInvalidValues(void) {
-    // Puntero invalido
+void test_InvalidValuesOnInit(void) {
+    uint16_t leds = 0xFFFF;
     int init_value = Leds_Init(NULL);
     TEST_ASSERT_EQUAL(-1, init_value);
 
-    // Puntero valido
-    uint16_t leds = 0xFFFF;
     init_value = Leds_Init(&leds);
     TEST_ASSERT_EQUAL(0, init_value);
+}
 
-    // Encender led invalido
+void test_InvalidValuesOnTurnOn(void) {
+    // Invalid index 0
     int turn_on_value = Leds_TurnOn(0);
     TEST_ASSERT_EQUAL(-1, turn_on_value);
 
+    // Invalid index 17
     turn_on_value = Leds_TurnOn(17);
     TEST_ASSERT_EQUAL(-1, turn_on_value);
 
-    // Encender led valido
-    turn_on_value = Leds_TurnOn(1);
-    TEST_ASSERT_EQUAL(0, turn_on_value);
+    // Valid index but driver uninitialized
+    Leds_Init(NULL);
 
-    // Apagar led invalido
+    turn_on_value = Leds_TurnOn(1);
+    TEST_ASSERT_EQUAL(-1, turn_on_value);
+}
+
+void test_InvalidValuesOnTurnOff(void) {
+    // Invalid index 0
     int turn_off_value = Leds_TurnOff(0);
     TEST_ASSERT_EQUAL(-1, turn_off_value);
 
+    // Invalid index 17
     turn_off_value = Leds_TurnOff(17);
     TEST_ASSERT_EQUAL(-1, turn_off_value);
 
-    // Apagar led valido
-    turn_off_value = Leds_TurnOff(16);
-    TEST_ASSERT_EQUAL(0, turn_off_value);
+    // Valid index but driver uninitialized
+    Leds_Init(NULL);
 
-    // Encender todos los leds
+    turn_off_value = Leds_TurnOff(1);
+    TEST_ASSERT_EQUAL(-1, turn_off_value);
+}
+
+void test_InvalidValuesOnTurnAllOn(void) {
+    // Trying to turn all leds on with uninitialized driver
+    Leds_Init(NULL);
+
     int turn_all_on_value = Led_TurnAllOn();
-    TEST_ASSERT_EQUAL(0, turn_all_on_value);
+    TEST_ASSERT_EQUAL(-1, turn_all_on_value);
+}
+
+void test_InvalidValuesOnIsLedOn(void) {
+    // Invalid index 0
+    int is_led_on_value = Leds_IsLedOn(0);
+    TEST_ASSERT_EQUAL(-1, is_led_on_value);
+
+    // Invalid index 17
+    is_led_on_value = Leds_IsLedOn(17);
+    TEST_ASSERT_EQUAL(-1, is_led_on_value);
+
+    // Valid index but driver uninitialized
+    Leds_Init(NULL);
+
+    is_led_on_value = Leds_IsLedOn(1);
+    TEST_ASSERT_EQUAL(-1, is_led_on_value);
+}
+
+// 9. Se puede consultar el estado de un led en particular
+void test_LedState(void) {
+    Leds_TurnOn(3);
+    TEST_ASSERT_EQUAL(1, Leds_IsLedOn(3));
+    TEST_ASSERT_EQUAL(0, Leds_IsLedOn(4));
 }

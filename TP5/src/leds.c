@@ -21,11 +21,13 @@ static int NumberToBit(int led_idx) {
 }
 
 int Leds_Init(uint16_t * address) {
-    RETURN_IF_INVALID_ADDRESS(address)
-
     leds_ = address;
     state_ = ALL_LEDS_OFF;
+
+    RETURN_IF_INVALID_ADDRESS(address)
+
     *leds_ = state_;
+
     return 0;
 };
 
@@ -60,5 +62,5 @@ int Leds_IsLedOn(int led) {
     RETURN_IF_INVALID_RANGE(led);
     RETURN_IF_INVALID_ADDRESS(leds_);
 
-    return state_ & NumberToBit(led);
+    return (state_ & NumberToBit(led)) > 0;
 }
