@@ -48,6 +48,10 @@ tp2:
     cd {{justfile_directory()}}/TP2
     ceedling
 
+tp5:
+    #!/bin/bash
+    cd {{justfile_directory()}}/TP5
+    ceedling gcov:all utils:gcov
 
 # Clean repository.
 clean:
