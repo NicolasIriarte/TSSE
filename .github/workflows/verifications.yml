@@ -53,3 +53,18 @@ jobs:
         with:
           recreate: true
           path: code-coverage-results.md
+  Tp3:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v4
+      - name: Install Ceedling
+        run: gem install ceedling
+      - name: Install GCov Reporter
+        run: pip install gcovr
+      - name: Run Format Validations
+        uses: pre-commit/action@v3.0.0
+      - name: Install just
+        run: sudo snap install --edge --classic just
+      - name: Run coverage
+        run: cd Tp3 && just coverage

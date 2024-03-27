@@ -1,0 +1,250 @@
+# Indent all files
+indent:
+    #!/usr/bin/env bash
+    pre-commit install
+    pre-commit run -a
+
+# Create latex pdf with files on `doc/`
+latex:
+    #!/usr/bin/env bash
+    set -ex
+
+    # Generate (or update) doxygen documentation.
+    doxygen Doxyfile
+
+    # Copy latex files to `doc/` directory.
+    cp doxygen/latex/*.sty doc/
+    cp doxygen/latex/_*_8h* doc/
+
+    # Generate latex pdf.
+    cd {{justfile_directory()}}/doc
+
+    # Run pdflatex and allow it to fail.
+    pdflatex -shell-escape \\nonstopmode\\input main.tex || echo "First pdflatex failed."
+    pdflatex -shell-escape \\nonstopmode\\input main.tex || echo "Second pdflatex failed."
+    pdflatex -shell-escape \\nonstopmode\\input main.tex && echo "Third pdflatex failed."
+
+    # Rename pdf file.
+    mv main.pdf user-manual.pdf
+
+# Generate documentation with doxygen.
+doxygen:
+    #!/usr/bin/env bash
+    set -e
+
+    # Generate (or update) doxygen documentation.
+    doxygen Doxyfile
+
+    # Move doxygen documentation to `public/` directory.
+    rm -rf {{justfile_directory()}}/public
+    cp -rf {{justfile_directory()}}/doxygen/html {{justfile_directory()}}/public
+
+
+# Generate coverage file.
+coverage:
+    #!/usr/bin/env bash
+    set -e
+    rm -rf build/*.xml build/*.html
+    if [[ ! -d  build/gcc-debug ]]; then
+        cmake --preset=gcc-debug
+    fi
+
+    # Generate correct compile_commands.json
+    if [[ -f compile_commands.json || -L compile_commands.json ]]; then
+        rm -rf compile_commands.json
+    fi
+    ln -s build/gcc-debug/compile_commands.json .
+
+    # Compile and test.
+    cd build/gcc-debug
+    make -j$(expr $(nproc) - 1)
+    ctest --output-on-failure
+    cd {{justfile_directory()}}
+    mkdir -p coverage/
+    gcovr \
+          --xml-pretty \
+          --html-details coverage/index.html \
+          --exclude-unreachable-branches \
+          --print-summary \
+          -j$(expr $(nproc) - 1) \
+          --exclude-directories build/gcc-debug/libs/Nemu/tests \
+          --filter libs/ \
+          -o coverage/coverage.xml \
+          --root {{justfile_directory()}}
+
+# Create a gcc debug compilation.
+gcc-debug:
+    #!/usr/bin/env bash
+    set -e
+
+    # Generate cmake build directory
+    if [[ ! -d  build/gcc-debug ]]; then
+        cmake --preset=gcc-debug
+    fi
+
+    # Generate correct compile_commands.json
+    if [[ -f compile_commands.json || -L compile_commands.json ]]; then
+        rm -rf compile_commands.json
+    fi
+    ln -s build/gcc-debug/compile_commands.json .
+
+    # Compilation and test
+    cd build/gcc-debug
+    make -j$(expr $(nproc) - 1)
+    ctest --output-on-failure --output-junit gcc-junit.xml
+
+# Create a clang debug compilation.
+clang-debug:
+    #!/usr/bin/env bash
+    set -e
+    # Generate cmake build directory
+    if [[ ! -d  build/clang-debug ]]; then
+        cmake --preset=clang-debug
+    fi
+
+    # Generate correct compile_commands.json
+    if [[ -f compile_commands.json || -L compile_commands.json ]]; then
+        rm -rf compile_commands.json
+    fi
+    ln -s build/clang-debug/compile_commands.json .
+
+    # Compilation and test
+    cd build/clang-debug
+    make -j$(expr $(nproc) - 1)
+    ctest --output-on-failure --output-junit clang-junit.xml
+
+# Create a gcc release compilation.
+gcc-release:
+    #!/usr/bin/env bash
+    set -e
+    # Generate cmake build directory
+    if [[ ! -d  build/gcc-release ]]; then
+        cmake --preset=gcc-release
+    fi
+
+    # Generate correct compile_commands.json
+    if [[ -f compile_commands.json || -L compile_commands.json ]]; then
+        rm -rf compile_commands.json
+    fi
+    ln -s build/gcc-release/compile_commands.json .
+
+    # Compilation and test
+    cd build/gcc-release
+    make -j$(expr $(nproc) - 1)
+
+# Create a clang release compilation.
+clang-release:
+    #!/usr/bin/env bash
+    set -e
+    # Generate cmake build directory
+    if [[ ! -d  build/clang-release ]]; then
+        cmake --preset=clang-release
+    fi
+
+    # Generate correct compile_commands.json
+    if [[ -f compile_commands.json || -L compile_commands.json ]]; then
+        rm -rf compile_commands.json
+    fi
+    ln -s build/clang-release/compile_commands.json .
+
+    # Compilation and test
+    cd build/clang-release
+    make -j$(expr $(nproc) - 1)
+
+# Install gcc release version.
+gcc-install:
+    #!/usr/bin/env bash
+    set -e
+    if [[ ! -d  build/gcc-release ]]; then
+        cmake --preset=gcc-release
+    fi
+
+    # If no user-manual detected, generate it to add it to the deliverable.
+    if [[ ! -f  doc/user-manual.pdf ]]; then
+        just latex
+    fi
+
+    cd build/gcc-release
+    make -j$(expr $(nproc) - 1) install/strip
+
+# Install clang release version.
+clang-install:
+    #!/usr/bin/env bash
+    set -e
+    if [[ ! -d  build/clang-release ]]; then
+        cmake --preset=clang-release
+    fi
+
+    # If no user-manual detected, generate it to add it to the deliverable.
+    if [[ ! -f  doc/user-manual.pdf ]]; then
+        just latex
+    fi
+
+    cd build/clang-release
+    make -j$(expr $(nproc) - 1) install/strip
+
+# Generate gcc release installable package.
+gcc-installable:
+    #!/usr/bin/env bash
+    set -e
+    if [[ ! -d  build/gcc-release ]]; then
+        cmake --preset=gcc-release
+    fi
+
+    # If no user-manual detected, generate it to add it to the deliverable.
+    if [[ ! -f  doc/user-manual.pdf ]]; then
+        just latex
+    fi
+
+    cd build/gcc-release
+    make -j$(expr $(nproc) - 1) package
+
+# Generate clang release installable package.
+clang-installable:
+    #!/usr/bin/env bash
+    set -e
+    if [[ ! -d  build/clang-release ]]; then
+        cmake --preset=clang-release
+    fi
+
+    # If no user-manual detected, generate it to add it to the deliverable.
+    if [[ ! -f  doc/user-manual.pdf ]]; then
+        just latex
+    fi
+
+    cd build/clang-release
+    make -j$(expr $(nproc) - 1) package
+
+
+
+# Removes all generated directories, files and cache.
+clean:
+    echo "Removing previous compilations."
+    rm -rf build
+    echo "Removing cache."
+    rm -rf .cache
+    echo "Removing generated documentation."
+    rm -rf public
+    echo "Removing previous installs."
+    rm -rf install
+    echo "Removing 'compile_commands.json' file."
+    rm -rf compile_commands.json
+    echo "Removing Doxygen files."
+    rm -rf doxygen
+    rm -rf /doc/_*_8h*
+    echo "Removing ASM compiled files."
+    rm -rf libs/NemuLua/tests/asm_files/*.txt
+    rm -rf libs/NemuLua/tests/asm_files/*.elf
+    rm -rf libs/NemuLua/tests/asm_files/*.out
+    echo "Done."
+
+
+# Init subtree repositories.
+init-subtree:
+    #!/usr/bin/env bash
+    set -e
+    # Add a new git remote repostory called `Doxygen` if doesn't exists.
+    git remote add -f Doxygen https://github.com/jothepro/doxygen-awesome-css.git 2> /dev/null || echo "Remote already exists."
+
+    # Add `Doxygen` as a subtree in `libs/Doxygen`.
+    git subtree add --prefix=libs/Doxygen Doxygen v2.2.1 --squash
