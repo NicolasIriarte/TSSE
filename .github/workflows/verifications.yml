@@ -53,3 +53,35 @@ jobs:
         with:
           recreate: true
           path: code-coverage-results.md
+  Tp3:
+    runs-on: ubuntu-latest
+    steps:
+      # Workaround for https://github.com/actions/runner-images/issues/8659
+      - uses: mjp41/workaround8649@c8550b715ccdc17f89c8d5c28d7a48eeff9c94a8
+      - name: Install libelf development package
+        run: sudo apt-get install -y libelf-dev
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v4
+      - name: Install GCov Reporter
+        run: pip install gcovr
+      - name: Run Format Validations
+        uses: pre-commit/action@v3.0.0
+      - name: Install just
+        run: sudo snap install --edge --classic just
+      - name: Run coverage
+        run: cd TP3 && just coverage
+      - name: Create HTML artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: html-css-artifacts
+          path: TP3/coverage/
+      - name: Add Coverage PR Comment
+        uses: marocchino/sticky-pull-request-comment@v2
+        if: github.event_name == 'pull_request'
+        with:
+          header: test
+          message: |
+            ```
+            ${{ env.test_result }}
+            Coverage report for TP3 was uploaded as artifact.
+            ```
