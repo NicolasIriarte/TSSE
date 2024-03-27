@@ -76,7 +76,7 @@ jobs:
         if: success() || failure()
         with:
           name: Ceedling Unit Tests
-          path: TP3/coverage/cobertura.xml
+          path: TP3/coverage/coverage.xml
           reporter: jest-junit
       - name: Output to Job Summary
         run: cat code-coverage-results.md >> $GITHUB_STEP_SUMMARY
