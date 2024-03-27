@@ -58,8 +58,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v4
-      - name: Install Ceedling
-        run: gem install ceedling
       - name: Install GCov Reporter
         run: pip install gcovr
       - name: Run Format Validations
