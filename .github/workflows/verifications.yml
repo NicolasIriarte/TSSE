@@ -70,19 +70,24 @@ jobs:
         run: sudo snap install --edge --classic just
       - name: Run coverage
         run: cd TP3 && just coverage
-########
-      - name: Test Report
-        uses: dorny/test-reporter@v1
-        if: success() || failure()
-        with:
-          name: Ceedling Unit Tests
-          path: TP3/coverage/coverage.xml
-          reporter: jest-junit
-      - name: Output to Job Summary
-        run: cat code-coverage-results.md >> $GITHUB_STEP_SUMMARY
-      - name: Add Coverage PR Comment
-        uses: marocchino/sticky-pull-request-comment@v2
-        if: github.event_name == 'pull_request'
-        with:
-          recreate: true
-          path: code-coverage-results.md
+
+    - name: Find HTML files
+      run: |
+        find TP3/coverage -name "*.html" -type f > artifact_files.txt
+
+    - name: Find CSS files
+      run: |
+        find TP3/coverage -name "*.css -type f >> artifact_files.txt
+
+    - name: Find XML files
+      run: |
+        find TP3/coverage -name "*.xml -type f >> artifact_files.txt
+
+
+
+    - name: Create HTML artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: html-css-artifacts
+        path: artifact_files.txt
+
