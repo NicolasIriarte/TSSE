@@ -56,6 +56,8 @@ jobs:
   Tp3:
     runs-on: ubuntu-latest
     steps:
+      # Workaround for https://github.com/actions/runner-images/issues/8659
+      - uses: mjp41/workaround8649@c8550b715ccdc17f89c8d5c28d7a48eeff9c94a8
       - name: Install libelf development package
         run: sudo apt-get install -y libelf-dev
       - uses: actions/checkout@v4
