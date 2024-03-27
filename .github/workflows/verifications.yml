@@ -65,4 +65,4 @@ jobs:
       - name: Install just
         run: sudo snap install --edge --classic just
       - name: Run coverage
-        run: cd Tp3 && just coverage
+        run: cd TP3 && just coverage
