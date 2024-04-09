@@ -5,5 +5,7 @@ la Universidad de Buenos Aires (UBA), carrera especialización en sistemas
 embebidos (CESE).
 
 - TP1: Master Test Plan
-
 - TP2: TDD con ceedling
+- TP3: Testing unitario
+- TP4: Integración continua (Vea directorios `TP3` y `TP5` para su implementación)
+- TP5: Pruebas de sistema
